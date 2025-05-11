@@ -8,9 +8,12 @@ function InventoryTable({ inventory, onDeleteItem }) {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  // Ensure inventory is an array - this prevents the t.map is not a function error
+  const inventoryArray = Array.isArray(inventory) ? inventory : [];
+
   return (
     <div className="overflow-x-auto">
-      {inventory.length === 0 ? (
+      {inventoryArray.length === 0 ? (
         <p className="text-center py-4 text-gray-500">No items found in inventory</p>
       ) : (
         <table className="min-w-full divide-y divide-gray-200">
@@ -24,7 +27,7 @@ function InventoryTable({ inventory, onDeleteItem }) {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {inventory.map((item) => (
+            {inventoryArray.map((item) => (
               <tr key={item.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{item.id}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.name}</td>

@@ -6,8 +6,8 @@ import SearchBar from './components/SearchBar';
 import AddItemForm from './components/AddItemForm';
 import Header from './components/Header';
 
-//fetch the backend URL
-const backendURL = "https://inventory-manager-tutorial.vercel.app/"
+// Hard-coded backend URL
+const backendURL = "https://inventory-manager-tutorial.vercel.app";
 
 function App() {
   const [inventory, setInventory] = useState([]);
@@ -21,12 +21,20 @@ function App() {
   const fetchInventory = async () => {
     try {
       setLoading(true);
+      console.log(`Fetching inventory from: ${backendURL}/inventory`);
       const response = await axios.get('/inventory');
-      setInventory(response.data);
+      
+      console.log('Response data:', response.data);
+      
+      // Ensure we're setting an array
+      const inventoryData = Array.isArray(response.data) ? response.data : [];
+      setInventory(inventoryData);
       setError(null);
     } catch (err) {
-      setError('Failed to fetch inventory items');
-      console.error(err);
+      console.error('Error fetching inventory:', err);
+      setError(`Failed to fetch inventory items: ${err.message}`);
+      // Set inventory to empty array on error
+      setInventory([]);
     } finally {
       setLoading(false);
     }
@@ -36,20 +44,27 @@ function App() {
   const handleSearch = async () => {
     try {
       setLoading(true);
+      let response;
+      
       if (searchType === 'name' && searchTerm) {
-        const response = await axios.get(`/search?name=${searchTerm}`);
-        setInventory(response.data);
+        console.log(`Searching by name: ${searchTerm}`);
+        response = await axios.get(`/search?name=${searchTerm}`);
       } else if (searchType === 'quantity' && searchQuantity) {
-        const response = await axios.get(`/search/quantity?quantity=${searchQuantity}`);
-        setInventory(response.data);
+        console.log(`Searching by quantity: ${searchQuantity}`);
+        response = await axios.get(`/search/quantity?quantity=${searchQuantity}`);
       } else {
         // If search terms are empty, fetch all inventory
-        fetchInventory();
+        return fetchInventory();
       }
+      
+      console.log('Search response:', response.data);
+      const searchData = Array.isArray(response.data) ? response.data : [];
+      setInventory(searchData);
       setError(null);
     } catch (err) {
-      setError('Search failed');
-      console.error(err);
+      console.error('Search error:', err);
+      setError(`Search failed: ${err.message}`);
+      setInventory([]);
     } finally {
       setLoading(false);
     }
@@ -58,31 +73,43 @@ function App() {
   // Add a new item
   const handleAddItem = async (name, quantity) => {
     try {
-      await axios.post('/inventory/add', { name, quantity: parseInt(quantity, 10) });
+      console.log(`Adding item: ${name}, quantity: ${quantity}`);
+      const response = await axios.post('/inventory/add', { 
+        name, 
+        quantity: parseInt(quantity, 10) 
+      });
+      console.log('Add response:', response.data);
       fetchInventory(); // Refresh the list
     } catch (err) {
-      setError('Failed to add item');
-      console.error(err);
+      console.error('Error adding item:', err);
+      setError(`Failed to add item: ${err.message}`);
     }
   };
 
   // Delete an item
   const handleDeleteItem = async (id) => {
     try {
-      await axios.delete('/inventory/delete', { data: { id } });
+      console.log(`Deleting item with ID: ${id}`);
+      const response = await axios.delete('/inventory/delete', { data: { id } });
+      console.log('Delete response:', response.data);
       fetchInventory(); // Refresh the list
     } catch (err) {
-      setError('Failed to delete item');
-      console.error(err);
+      console.error('Error deleting item:', err);
+      setError(`Failed to delete item: ${err.message}`);
     }
   };
 
   // Load inventory on component mount
   useEffect(() => {
-    fetchInventory();
-    
     // Set up axios base URL
     axios.defaults.baseURL = backendURL;
+    console.log(`Setting axios base URL to: ${backendURL}`);
+    
+    // Add some debug information
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Backend URL:', backendURL);
+    
+    fetchInventory();
   }, []);
 
   return (
@@ -113,7 +140,15 @@ function App() {
           {loading ? (
             <p className="text-center py-4">Loading inventory...</p>
           ) : error ? (
-            <p className="text-red-500 text-center py-4">{error}</p>
+            <div className="text-red-500 text-center py-4">
+              <p>{error}</p>
+              <button 
+                onClick={fetchInventory} 
+                className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Retry
+              </button>
+            </div>
           ) : (
             <InventoryTable inventory={inventory} onDeleteItem={handleDeleteItem} />
           )}
