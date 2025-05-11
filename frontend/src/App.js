@@ -5,6 +5,12 @@ import InventoryTable from './components/InventoryTable';
 import SearchBar from './components/SearchBar';
 import AddItemForm from './components/AddItemForm';
 import Header from './components/Header';
+//Import env
+import dotenv from 'dotenv';
+dotenv.config();
+
+//fetch the backend URL
+const backendURL = process.env.NODE_APP_BACKEND_URL;
 
 function App() {
   const [inventory, setInventory] = useState([]);
@@ -79,7 +85,7 @@ function App() {
     fetchInventory();
     
     // Set up axios base URL
-    axios.defaults.baseURL = 'http://localhost:3000';
+    axios.defaults.baseURL = backendURL;
   }, []);
 
   return (
