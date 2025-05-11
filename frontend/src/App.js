@@ -10,7 +10,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 //fetch the backend URL
-const backendURL = process.env.NODE_APP_BACKEND_URL;
+const backendURL = "https://inventory-manager-tutorial.vercel.app/"
 
 function App() {
   const [inventory, setInventory] = useState([]);
