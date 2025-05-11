@@ -5,9 +5,6 @@ import InventoryTable from './components/InventoryTable';
 import SearchBar from './components/SearchBar';
 import AddItemForm from './components/AddItemForm';
 import Header from './components/Header';
-//Import env
-import dotenv from 'dotenv';
-dotenv.config();
 
 //fetch the backend URL
 const backendURL = "https://inventory-manager-tutorial.vercel.app/"
